@@ -7,7 +7,7 @@ function LandingPage() {
     <div className='container'>
       <img
         src={image}
-        alt=''
+        alt='imagen de fondo'
         className='img-landing'
       />
       <h1 className='titulo'>Bienvenidos a Poke Page</h1>
