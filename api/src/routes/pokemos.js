@@ -1,13 +1,6 @@
 const { Router } = require('express');
-const { Pokemon } = require('../db')
-// const axios = require('axios');
+const { Pokemon } = require('../db');
 const router = Router();
-
-// router.get('/', async (req, res) => {
-//   const respuesta = await axios.get('https://pokeapi.co/api/v2/pokemon');
-//   const names = { ...respuesta.data.results }
-//   res.send(names);
-// });
 
 router.get('/', (req, res, next) => {
   return Pokemon.findAll()
@@ -20,7 +13,6 @@ router.get('/', (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-
   try {
     const {
       name,
@@ -45,6 +37,18 @@ router.post('/', async (req, res, next) => {
       creadaEnBb
     })
     res.status(201).send(newPokemon)
+  }
+  catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:pokemonId/type/:typeId', async (req, res, next) => {
+  try {
+    const { pokemonId, typeId } = req.params;
+    const pokemon = await Pokemon.findByPk(pokemonId)
+    await pokemon.addType(typeId)
+    res.send(200)
   }
   catch (error) {
     next(error)
