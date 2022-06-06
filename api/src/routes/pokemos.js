@@ -1,16 +1,46 @@
 const { Router } = require('express');
-const { Pokemon } = require('../db');
+const axios = require('axios');
+const { Pokemon, Types } = require('../db');
 const router = Router();
 
+// 1:12
+
 router.get('/', (req, res, next) => {
-  return Pokemon.findAll()
-    .then((Pokemon) => {
-      res.send(Pokemon)
-    })
-    .catch((error) => {
-      next(error)
+  let pokemonPromiseApi = axios.get('https://pokeapi.co/api/v2/pokemon') // promesa
+  let pokemonPromiseDb = Pokemon.findAll({  // promesa
+    include: Types
+  })
+
+  Promise.all([
+    pokemonPromiseApi,
+    pokemonPromiseDb
+  ])
+    .then((respuesta) => {
+      const [pokemonApi, pokemonDb] = respuesta
+      let filteredPokemosApi = pokemonApi.data.results.map((pokemon) => {
+        return {
+          id: pokemon.id,
+          name: pokemon.name,
+          image: pokemon.image
+        }
+      })
+
+      let allPokemons = [...filteredPokemosApi, ...pokemonDb]
+      res.send(allPokemons)
     })
 })
+
+// router.get('/', (req, res, next) => {
+//   return Pokemon.findAll({
+//     include: Types
+//   })
+//     .then((Pokemon) => {
+//       res.send(Pokemon)
+//     })
+//     .catch((error) => {
+//       next(error)
+//     })
+// })
 
 router.post('/', async (req, res, next) => {
   try {
