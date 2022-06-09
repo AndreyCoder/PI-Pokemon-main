@@ -1,34 +1,25 @@
-const { Router } = require('express');
-const { Type } = require('../db');
+const axios = require("axios");
+const { Router } = require("express");
+const { Type } = require("../db.js");
+
 const router = Router();
 
-router.get('/', async (req, res, next) => {
+router.get("/", async (_req, res, next) => {
   try {
-    const type = await Type.findAll()
-    res.send(type)
+    const api = await axios.get("https://pokeapi.co/api/v2/type"); //Trae todos los tipos
+    const types = await api.data // trae la respuesta en data
+    for (type of types.results) { //Entra a la propiedad results, a cada elemento..
+      const find = await Type.findOne({ where: {name: type.name}}); // Entra a la propiedad name y busca si ya existe 
+      if (!find)  { // Si no lo encuentra..
+        await Type.create({ name: type.name }); //Lo agrega a la base de datos
+      } else {
+        return res.json(await Type.findAll()) // Sino devuelve todos los tipos
+      }
+    }
+    res.json(await Type.findAll()); //Finalmente devuelvo todos los tipos de la Db.
+  } catch (error) {
+    next(error);
   }
-  catch (error) {
-    next(error)
-  }
-});
-
-router.post('/', (req, res, next) => {
-  const { name } = req.body;
-  return Type.create({ name })
-    .then((newType) => {
-      newType
-      res.status(201).send(newType);
-    })
-    .catch(error => next(error))
-});
-
-router.put('/', (req, res, next) => {
-  res.send('soy put / types')
-});
-
-
-router.delete('/', (req, res, next) => {
-  res.send('soy delete / types')
 });
 
 
