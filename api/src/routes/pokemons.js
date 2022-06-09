@@ -8,7 +8,7 @@ router.get("/", async (req, res, next) => {
     let name = req.query.name; //Recibo la request en una variable
     let pokemonsTotal = await getAllPokemons(); //Guardo mi controlador que trae todos los pokemons en una variable..
     if (name) { //Consulto si me pasan un nombre y lo busco en la variable de arriba
-      let pokemonName = await pokemonsTotal.filter((el) => 
+      let pokemonName = await pokemonsTotal.filter((el) =>
         el.name.toLowerCase().includes(name.toLowerCase())
       );
       pokemonName.length
@@ -27,7 +27,7 @@ router.get("/:id", async (req, res, next) => { //Busqueda por id
     const id = req.params.id;
     const pokemonsTotal = await getAllPokemons();
     if (id) { //Si me pasan un ID, filtro el que coincida con ese mismo, sino devuelvo texto.
-      let pokemonId = pokemonsTotal.filter((el) => el.id == id); 
+      let pokemonId = pokemonsTotal.filter((el) => el.id == id);
       pokemonId.length
         ? res.status(200).json(pokemonId)
         : res.status(404).send("No se encontró el pokemon");
@@ -39,7 +39,17 @@ router.get("/:id", async (req, res, next) => { //Busqueda por id
 
 router.post("/", async (req, res, next) => { //Ruta de creacion del pokemon
   try {
-    let { name, image, life, attack, defense, speed, height, weight, types} = req.body //Datos que necesito pedir
+    // 👇 Datos que necesito pedir
+    let {
+      name,
+      image,
+      life,
+      attack,
+      defense,
+      speed,
+      height,
+      weight,
+      types } = req.body
 
     const newPokemon = await Pokemon.create({
       name,
@@ -54,15 +64,20 @@ router.post("/", async (req, res, next) => { //Ruta de creacion del pokemon
 
     if (!name) return res.json({ info: "El nombre es obligatorio" });
 
-    if(Array.isArray(types) && types.length){ //Consulto si lo que me llega en TYPES, es un arreglo y si tiene algo adentro.
-      let dbTypes = await Promise.all( //Armo una variable que dentro tendra una resolucion de promesas
-        types.map((e) => { // Agarro la data de types y le hago un map para verificar que cada elemento exista en 
-          return Type.findOne({where:{ name: e}}) // nuestra tabla de tipos
+    // 👇 Consulto si lo que me llega en TYPES, es un arreglo y si tiene algo adentro.
+    if (Array.isArray(types) && types.length) {
+      // 👇 Armo una variable que dentro tendra una resolucion de promesas
+      let dbTypes = await Promise.all(
+        // Agarro la data de types y le hago un map para verificar que cada elemento exista en
+        // 👇 nuestra tabla de tipos
+        types.map((e) => {
+          return Type.findOne({ where: { name: e } })
         })
       )
-     await newPokemon.setTypes(dbTypes) //Una vez que se resuelva la promesa del Pokemon.create, le agrego los tipos
+      //Una vez que se resuelva la promesa del Pokemon.create, le agrego los tipos
+      await newPokemon.setTypes(dbTypes)
 
-     return res.send("Pokemon creado exitosamente");
+      return res.send("Pokemon creado exitosamente");
     }
   } catch (err) {
     res.status(400).send("Error en data");

@@ -6,17 +6,25 @@ const router = Router();
 
 router.get("/", async (_req, res, next) => {
   try {
-    const api = await axios.get("https://pokeapi.co/api/v2/type"); //Trae todos los tipos
-    const types = await api.data // trae la respuesta en data
-    for (type of types.results) { //Entra a la propiedad results, a cada elemento..
-      const find = await Type.findOne({ where: {name: type.name}}); // Entra a la propiedad name y busca si ya existe 
-      if (!find)  { // Si no lo encuentra..
-        await Type.create({ name: type.name }); //Lo agrega a la base de datos
+    // 👇 Trae todos los tipos
+    const api = await axios.get("https://pokeapi.co/api/v2/type");
+    // 👇 trae la respuesta en data
+    const types = await api.data
+    // 👇 Entra a la propiedad results, a cada elemento..
+    for (type of types.results) {
+      // 👇 Entra a la propiedad name y busca si ya existe
+      const find = await Type.findOne({ where: { name: type.name } });
+      // 👇 Si no lo encuentra..
+      if (!find) {
+        // 👇 Lo agrega a la base de datos
+        await Type.create({ name: type.name });
       } else {
-        return res.json(await Type.findAll()) // Sino devuelve todos los tipos
+        // 👇 Sino devuelve todos los tipos
+        return res.json(await Type.findAll())
       }
     }
-    res.json(await Type.findAll()); //Finalmente devuelvo todos los tipos de la Db.
+    // 👇 Finalmente devuelvo todos los tipos de la Db.
+    res.json(await Type.findAll());
   } catch (error) {
     next(error);
   }
